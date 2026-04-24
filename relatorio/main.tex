@@ -1,0 +1,625 @@
+\documentclass[12pt,a4paper]{article}
+
+%------------------------------------------------
+% PACOTES
+%------------------------------------------------
+\usepackage[utf8]{inputenc}
+\usepackage[brazil]{babel}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{url}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{placeins}
+\usepackage{float}
+\usepackage{subcaption}
+\usepackage{caption}
+\usepackage{booktabs}
+\usepackage{hyperref}
+
+\geometry{a4paper,left=3cm,right=3cm,top=3cm,bottom=3cm}
+\onehalfspacing
+\captionsetup{font=small}
+
+%------------------------------------------------
+% CONFIGURAÇÃO DE CÓDIGO
+%------------------------------------------------
+\lstset{
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    commentstyle=\color{gray},
+    stringstyle=\color{red},
+    numbers=left,
+    numberstyle=\tiny,
+    breaklines=true,
+    frame=single,
+    showstringspaces=false
+}
+
+%------------------------------------------------
+% DOCUMENTO
+%------------------------------------------------
+\begin{document}
+
+\begin{center}
+\textbf{CENTRO FEDERAL DE EDUCAÇÃO TECNOLÓGICA CELSO SUCKOW DA FONSECA}\\
+\textbf{CEFET/RJ}\\[0.3cm]
+
+\textbf{Disciplina: Processamento de Sinais I}\\
+\textbf{Aula Prática 4 – DFT e DCT}\\[0.5cm]
+
+\textbf{Autor:}\\
+Caio Bernardo Maciel\\
+[0.5cm]
+
+\textbf{Data:} \today
+\end{center}
+
+\vspace{0.5cm}
+
+%------------------------------------------------
+\section*{Resumo}
+
+Este relatório apresenta uma análise prática das transformadas discreta de Fourier (DFT) e discreta de cossenos (DCT), com foco em suas aplicações no processamento de sinais. Inicialmente, é investigada a relação entre a DFT e a DTFT, bem como a influência do tamanho da transformada na resolução espectral e na identificação de componentes senoidais próximas, incluindo o efeito do zero-padding. Em seguida, avalia-se o uso da DFT e da DCT na compressão de sinais unidimensionais de áudio, comparando taxa de compressão, número de coeficientes e erro quadrático médio. Por fim, estuda-se a aplicação da DCT em imagens, tanto na análise da distribuição de energia quanto na compressão bidimensional em blocos, destacando os impactos do tamanho do bloco e da taxa de compressão na qualidade visual da imagem reconstruída.
+
+%------------------------------------------------
+\section{Introdução}
+
+As transformadas no domínio da frequência são ferramentas fundamentais no Processamento Digital de Sinais, pois permitem analisar a composição espectral de sinais e compreender melhor suas características. Nesse contexto, a Transformada Discreta de Fourier (DFT) e a Transformada Discreta de Cossenos (DCT) se destacam por suas aplicações em análise espectral e compressão, sendo amplamente utilizadas em sinais de áudio e imagens.\\\\
+
+Nesta aula prática, são investigados o comportamento da DFT em comparação com a DTFT, a influência do tamanho da transformada na resolução espectral e o efeito do zero-padding. Além disso, analisa-se o uso da DFT e da DCT na compressão de sinais unidimensionais e bidimensionais, discutindo a concentração de energia, a quantidade de coeficientes utilizados, o erro introduzido e a qualidade dos sinais e imagens reconstruídos.
+
+
+%------------------------------------------------
+\section{Questão 1}
+
+Considere o sinal
+\[
+x[n] = \delta[n] - \delta[n-1] + \delta[n-2] - \delta[n-3].
+\]
+
+Como a sequência é não nula apenas para \(n=0,1,2,3\), pode-se escrevê-la como
+\[
+x[0]=1,\quad x[1]=-1,\quad x[2]=1,\quad x[3]=-1,
+\]
+ou, de forma equivalente,
+\[
+x[n]=\{1,-1,1,-1\}.
+\]
+
+A Transformada de Fourier em Tempo Discreto (DTFT) desse sinal é dada por
+\[
+X(e^{j\omega})=\sum_{n=-\infty}^{\infty}x[n]e^{-j\omega n}.
+\]
+Substituindo os valores de \(x[n]\), obtém-se
+\[
+X(e^{j\omega})=1-e^{-j\omega}+e^{-j2\omega}-e^{-j3\omega}.
+\]
+
+Essa expressão representa o espectro contínuo do sinal no domínio da frequência. Já a Transformada Discreta de Fourier (DFT) fornece apenas amostras discretas desse espectro, calculadas nos pontos
+\[
+\omega_k=\frac{2\pi k}{N}, \qquad k=0,1,\dots,N-1.
+\]
+Dessa forma, para cada valor de \(N\), a DFT corresponde à avaliação da DTFT em frequências igualmente espaçadas no intervalo \(0 \leq \omega < 2\pi\). A proposta da questão é justamente comparar a forma contínua da DTFT com suas amostragens obtidas pela DFT para diferentes valores de \(N\).
+
+\subsection{Cálculo da DFT para \(N=4\)}
+
+Para \(N=4\), a DFT é calculada nos pontos
+\[
+\omega_k=\frac{2\pi k}{4}=\left\{0,\frac{\pi}{2},\pi,\frac{3\pi}{2}\right\}.
+\]
+
+A expressão da DFT é
+\[
+X[k]=\sum_{n=0}^{3}x[n]e^{-j\frac{2\pi}{4}kn}.
+\]
+
+Calculando os coeficientes:
+
+\[
+X[0]=1-1+1-1=0
+\]
+
+\[
+X[1]=1-e^{-j\pi/2}+e^{-j\pi}-e^{-j3\pi/2}=0
+\]
+
+\[
+X[2]=\sum_{n=0}^{3}x[n]e^{-j\pi n}=1+1+1+1=4
+\]
+
+\[
+X[3]=0
+\]
+
+Portanto,
+\[
+X[k]=\{0,0,4,0\}.
+\]
+
+Observa-se que, para \(N=4\), a DFT apresenta apenas um valor não nulo em \(\omega=\pi\). No entanto, isso não significa que o espectro do sinal esteja restrito a uma única frequência, mas sim que a DTFT foi amostrada em um número muito reduzido de pontos.
+
+\subsection{Comparação para \(N=16\), \(64\) e \(1024\)}
+
+Quando o valor de \(N\) é aumentado para 16, 64 e 1024, a expressão da DFT continua associada ao mesmo sinal, mas o número de amostras no domínio da frequência cresce. Isso significa que a DFT passa a representar a DTFT em um conjunto cada vez mais denso de frequências. Em outras palavras, quanto maior o valor de \(N\), menor é o espaçamento entre os pontos de amostragem espectral.
+
+Para \(N=16\), já é possível perceber melhor o formato do espectro, pois a quantidade de pontos calculados permite identificar mais claramente a variação da magnitude ao longo da frequência. Para \(N=64\), a representação torna-se ainda mais detalhada, evidenciando melhor o comportamento espectral do sinal. Por fim, para \(N=1024\), a DFT fornece uma amostragem extremamente densa da DTFT, fazendo com que o gráfico discreto praticamente coincida com a curva contínua.
+
+\begin{figure}[H]
+    \centering
+
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{questao1_dtft_dft_N4.png}
+        \caption{\(N=4\)}
+        \label{fig:q1_n4}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{questao1_dtft_dft_N16.png}
+        \caption{\(N=16\)}
+        \label{fig:q1_n16}
+    \end{subfigure}
+
+    \vspace{0.4cm}
+
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{questao1_dtft_dft_N64.png}
+        \caption{\(N=64\)}
+        \label{fig:q1_n64}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{questao1_dtft_dft_N1024.png}
+        \caption{\(N=1024\)}
+        \label{fig:q1_n1024}
+    \end{subfigure}
+
+    \caption{Comparação entre a DTFT e a DFT do sinal \(x[n]=\delta[n]-\delta[n-1]+\delta[n-2]-\delta[n-3]\) para diferentes valores de \(N\). A curva contínua representa a DTFT, enquanto os pontos discretos representam as amostras da DFT.}
+    \label{fig:q1_dtft_dft}
+\end{figure}
+
+A Figura \ref{fig:q1_dtft_dft} ilustra de forma clara a diferença entre a DTFT e a DFT para diferentes comprimentos de transformada. Observa-se que, para \(N=4\), a DFT possui poucas amostras e, por isso, fornece uma representação bastante limitada do espectro. À medida que \(N\) aumenta para 16, 64 e 1024, os pontos da DFT tornam-se mais densos no eixo da frequência, aproximando-se progressivamente da curva contínua da DTFT. Isso confirma que o aumento de \(N\) não modifica o conteúdo espectral do sinal, mas melhora significativamente sua representação no domínio da frequência.
+
+\subsection{Discussão dos resultados}
+
+A comparação entre a DTFT e a DFT mostra que a principal diferença entre elas está na forma de representação no domínio da frequência. A DTFT é contínua em \(\omega\), enquanto a DFT é discreta e depende diretamente do número de pontos \(N\). Assim, a DFT pode ser interpretada como uma amostragem da DTFT em frequências igualmente espaçadas.
+
+No caso analisado, para \(N=4\), a representação espectral é bastante limitada, pois há poucos pontos de amostragem. À medida que \(N\) aumenta para 16, 64 e 1024, a DFT se aproxima progressivamente da DTFT, oferecendo uma descrição muito mais fiel do espectro do sinal. Portanto, conclui-se que o aumento de \(N\) não altera o conteúdo espectral do sinal, mas melhora significativamente a visualização e a interpretação de sua distribuição em frequência.
+
+\subsection{Conclusão}
+
+Conclui-se que a DTFT fornece a descrição completa e contínua do espectro do sinal, enquanto a DFT corresponde a uma versão amostrada desse espectro. Para valores pequenos de \(N\), a representação obtida pela DFT pode ser insuficiente para caracterizar adequadamente o comportamento espectral. Já para valores maiores, a DFT passa a reproduzir com maior fidelidade a DTFT, permitindo uma análise mais precisa do sinal no domínio da frequência.
+
+%------------------------------------------------
+\section{Questão 2}
+
+Considere o sinal contínuo
+\[
+x(t)=\sin(2\pi t)+\sin(2{,}02\pi t),
+\]
+amostrado com frequência
+\[
+f_s=10\,\text{Hz},
+\]
+gerando a sequência discreta \(x[n]\). Como a forma geral de uma senoide é dada por \(\sin(2\pi f t)\), conclui-se que o sinal é composto por duas componentes senoidais com frequências de \(1\,\text{Hz}\) e \(1{,}01\,\text{Hz}\), cuja separação é de apenas
+\[
+\Delta f_s = 1{,}01-1=0{,}01\,\text{Hz}.
+\]
+O objetivo desta questão é analisar como o tamanho da DFT influencia a resolução espectral, bem como discutir o efeito do zero-padding na representação do espectro. :contentReference[oaicite:0]{index=0}
+
+\subsection{Sinal amostrado}
+
+Como \(t=n/f_s\), o sinal discreto pode ser escrito como
+\[
+x[n]=\sin\left(2\pi\frac{n}{10}\right)+\sin\left(2{,}02\pi\frac{n}{10}\right).
+\]
+
+A resolução em frequência da DFT é dada por
+\[
+\Delta f=\frac{f_s}{N},
+\]
+onde \(N\) representa o número de pontos da transformada. Dessa forma, quanto maior o valor de \(N\), menor é o espaçamento entre os bins da DFT. No entanto, a capacidade real de distinguir duas frequências muito próximas depende principalmente do tempo de observação do sinal, isto é, do número de amostras reais coletadas.
+
+\subsection{Análise com 64 amostras reais}
+
+Inicialmente, foi considerada uma sequência com 64 amostras reais. Nesse caso, o tempo de observação é
+\[
+T=\frac{64}{10}=6{,}4\,\text{s},
+\]
+e a resolução espectral da DFT de 64 pontos é
+\[
+\Delta f=\frac{10}{64}=0{,}15625\,\text{Hz}.
+\]
+
+Como a separação entre as duas senoides do sinal é de apenas \(0{,}01\,\text{Hz}\), observa-se que essa diferença é muito menor do que a resolução espectral disponível. Portanto, não é possível distinguir claramente as duas componentes no espectro. Em vez disso, observa-se um único pico alargado na região próxima de \(1\,\text{Hz}\).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.78\textwidth]{q2_64amostras_N64.png}
+    \caption{Magnitude da DFT para 64 amostras reais e \(N=64\).}
+    \label{fig:q2_64_64}
+\end{figure}
+
+A Figura \ref{fig:q2_64_64} mostra que, com apenas 64 amostras, a DFT não possui resolução suficiente para separar as duas senoides presentes no sinal.
+
+\subsection{Efeito do zero-padding: 64 amostras reais e DFT de 128 pontos}
+
+Em seguida, foram mantidas as mesmas 64 amostras reais, mas foram adicionados 64 zeros ao sinal, resultando em uma DFT de 128 pontos. Nesse caso, o espaçamento entre bins passa a ser
+\[
+\Delta f=\frac{10}{128}=0{,}078125\,\text{Hz}.
+\]
+
+Embora esse valor seja menor do que no caso anterior, o zero-padding não acrescenta novas informações ao sinal, pois o tempo de observação continua sendo o mesmo. Assim, o que ocorre é apenas uma interpolação mais densa do espectro, tornando sua visualização mais suave e detalhada.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.78\textwidth]{q2_64amostras_N128_zeropadding.png}
+    \caption{Magnitude da DFT para 64 amostras reais e \(N=128\) com zero-padding.}
+    \label{fig:q2_64_128zp}
+\end{figure}
+
+A Figura \ref{fig:q2_64_128zp} mostra que o espectro fica visualmente mais refinado, mas as duas senoides ainda não podem ser distinguidas de forma clara. Portanto, o zero-padding melhora a representação gráfica, mas não a resolução espectral real.
+
+\subsection{Análise com 128 amostras reais}
+
+Na etapa seguinte, considerou-se um sinal com 128 amostras reais, sem zero-padding. Nesse caso, o tempo de observação passa a ser
+\[
+T=\frac{128}{10}=12{,}8\,\text{s},
+\]
+e a resolução espectral é
+\[
+\Delta f=\frac{10}{128}=0{,}078125\,\text{Hz}.
+\]
+
+Embora esse valor seja numericamente igual ao caso anterior, agora existe uma diferença essencial: a quantidade de informação real do sinal aumentou. Isso melhora efetivamente a capacidade de análise espectral, pois o sinal foi observado durante um intervalo de tempo maior.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.78\textwidth]{q2_128amostras_N128.png}
+    \caption{Magnitude da DFT para 128 amostras reais e \(N=128\).}
+    \label{fig:q2_128_128}
+\end{figure}
+
+A Figura \ref{fig:q2_128_128} evidencia uma melhora em relação ao caso com apenas 64 amostras reais. Entretanto, como a diferença entre as duas frequências ainda é muito pequena em relação à resolução disponível, continua não sendo possível separá-las claramente.
+
+\subsection{Zero-padding adicional para 128 amostras reais}
+
+A partir do sinal com 128 amostras reais, foram analisados ainda dois casos com zero-padding: DFT de 256 pontos e DFT de 512 pontos.
+
+Para \(N=256\),
+\[
+\Delta f=\frac{10}{256}=0{,}0390625\,\text{Hz},
+\]
+e para \(N=512\),
+\[
+\Delta f=\frac{10}{512}=0{,}01953125\,\text{Hz}.
+\]
+
+Esses valores indicam uma redução no espaçamento entre bins, o que torna o espectro progressivamente mais detalhado. Contudo, como o número de amostras reais permanece igual a 128, o zero-padding continua sem aumentar a resolução real do sistema.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.78\textwidth]{q2_128amostras_N256_zeropadding.png}
+    \caption{Magnitude da DFT para 128 amostras reais e \(N=256\) com zero-padding.}
+    \label{fig:q2_128_256zp}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.78\textwidth]{q2_128amostras_N512_zeropadding.png}
+    \caption{Magnitude da DFT para 128 amostras reais e \(N=512\) com zero-padding.}
+    \label{fig:q2_128_512zp}
+\end{figure}
+
+As Figuras \ref{fig:q2_128_256zp} e \ref{fig:q2_128_512zp} mostram que o aumento do número de pontos da DFT produz uma curva espectral mais suave e com maior detalhamento visual. No entanto, mesmo nesses casos, não há separação nítida entre as frequências de \(1\,\text{Hz}\) e \(1{,}01\,\text{Hz}\).
+
+\subsection{Discussão dos resultados}
+
+Os resultados obtidos mostram que o aumento do tamanho da DFT pode ter dois significados distintos. Quando esse aumento ocorre por meio da aquisição de mais amostras reais do sinal, há um ganho efetivo na resolução espectral, pois o tempo de observação se torna maior. Por outro lado, quando o aumento de \(N\) é obtido apenas com zero-padding, o que se tem é apenas uma amostragem mais densa da transformada, sem acréscimo de informação.
+
+Dessa forma, observa-se que o zero-padding é útil para melhorar a visualização do espectro e facilitar a estimativa da posição dos picos, mas não permite resolver componentes de frequência extremamente próximas caso o sinal original não tenha sido observado durante tempo suficiente. Neste problema, como a separação entre as senoides é de apenas \(0{,}01\,\text{Hz}\), nem mesmo com 128 amostras reais foi possível distingui-las de forma clara.
+
+\subsection{Conclusão}
+
+Conclui-se que a resolução espectral está diretamente relacionada ao tempo real de observação do sinal e, consequentemente, ao número de amostras reais utilizadas na análise. O zero-padding melhora a aparência do espectro e torna a representação em frequência mais densa, mas não substitui o aumento real da duração do sinal. Assim, para distinguir componentes muito próximas, como \(1\,\text{Hz}\) e \(1{,}01\,\text{Hz}\), é necessário utilizar um tempo de observação significativamente maior.
+
+
+
+
+%------------------------------------------------
+\section{Questão 3}
+
+A DFT também pode ser empregada na compressão de sinais unidimensionais, como séries temporais e sinais de áudio. Uma alternativa bastante utilizada para essa finalidade é a Transformada Discreta de Cossenos (DCT), que costuma apresentar maior capacidade de concentração de energia em um número reduzido de coeficientes. Nesta questão, foi analisada a compressão do sinal de áudio \texttt{handel.wav} utilizando DFT e DCT para diferentes fatores de preservação de energia \(r\), com o objetivo de comparar a quantidade de coeficientes necessários, o erro quadrático médio e a qualidade da reconstrução.
+
+\subsection{Metodologia}
+
+Inicialmente, o sinal de áudio foi transformado para o domínio da frequência utilizando a DFT e, em seguida, para o domínio da transformada de cossenos utilizando a DCT. Em ambos os casos, os coeficientes foram ordenados de acordo com sua contribuição energética, sendo mantidos apenas aqueles necessários para preservar a fração de energia especificada em cada valor de \(r\). Os demais coeficientes foram anulados, e os sinais comprimidos foram reconstruídos por meio das transformadas inversas correspondentes.
+
+A energia total associada aos coeficientes transformados foi calculada por
+\[
+E = \sum_k |C[k]|^2,
+\]
+onde \(C[k]\) representa os coeficientes da DFT ou da DCT. Para cada taxa de preservação de energia, foi determinado o número mínimo de coeficientes necessários para satisfazer a condição de energia acumulada desejada. Em seguida, o desempenho da reconstrução foi avaliado por meio do erro quadrático médio, definido como
+\[
+EQM=\frac{1}{N}\sum_{n=0}^{N-1}(x[n]-\hat{x}[n])^2,
+\]
+em que \(x[n]\) representa o sinal original e \(\hat{x}[n]\) o sinal reconstruído.
+
+\subsection{Resultados obtidos}
+
+A Tabela \ref{tab:q3_resultados} apresenta os resultados obtidos para as duas transformadas, considerando os fatores de preservação de energia solicitados.
+
+\begin{table}[H]
+    \centering
+    \caption{Comparação entre DFT e DCT na compressão do áudio \texttt{handel.wav}.}
+    \label{tab:q3_resultados}
+    \begin{tabular}{cccccc}
+        \toprule
+        \(r\) & Transformada & Coeficientes & \% coef. mantidos & \(N/K\) & EQM \\
+        \midrule
+        99,5\% & DFT & 48671 & 66,57\% & 1,50 & 206699,55 \\
+        99,5\% & DCT & 40702 & 55,67\% & 1,80 & 206719,34 \\
+        \midrule
+        99,0\% & DFT & 40987 & 56,06\% & 1,78 & 413383,37 \\
+        99,0\% & DCT & 33683 & 46,07\% & 2,17 & 413446,80 \\
+        \midrule
+        90,0\% & DFT & 11661 & 15,95\% & 6,27 & 4134454,89 \\
+        90,0\% & DCT & 9038 & 12,36\% & 8,09 & 4134366,36 \\
+        \midrule
+        75,0\% & DFT & 4325 & 5,92\% & 16,90 & 10335490,18 \\
+        75,0\% & DCT & 3200 & 4,38\% & 22,85 & 10334817,32 \\
+        \midrule
+        50,0\% & DFT & 1170 & 1,60\% & 62,49 & 20668064,13 \\
+        50,0\% & DCT & 835 & 1,14\% & 87,56 & 20667617,70 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+Observa-se, em todos os casos analisados, que a DCT necessitou de menos coeficientes do que a DFT para preservar a mesma fração de energia do sinal. Esse comportamento indica maior capacidade de compactação energética, característica esperada da DCT em problemas de compressão. Para \(r=99{,}5\%\), por exemplo, a DFT exigiu 48671 coeficientes, enquanto a DCT atingiu a mesma preservação energética com 40702 coeficientes. De forma semelhante, para \(r=50{,}0\%\), a DFT utilizou 1170 coeficientes, ao passo que a DCT necessitou de apenas 835.
+
+Em relação ao erro quadrático médio, verificou-se que os valores obtidos para DFT e DCT foram bastante próximos em todas as taxas de energia analisadas. Para os maiores valores de \(r\), como 99,5\% e 99,0\%, os erros foram baixos em comparação com os casos de compressão mais agressiva, o que indica elevada fidelidade ao sinal original. À medida que a taxa de energia preservada diminui, o número de coeficientes mantidos também diminui, mas o erro cresce consideravelmente, evidenciando a perda progressiva de informação causada pela compressão.
+
+\begin{figure}[H]
+    \centering
+
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{q3_coeficientes_vs_energia.png}
+        \caption{Número de coeficientes mantidos em função de \(r\).}
+        \label{fig:q3_coef}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{q3_percentual_coeficientes.png}
+        \caption{Percentual de coeficientes mantidos.}
+        \label{fig:q3_pct}
+    \end{subfigure}
+
+    \vspace{0.4cm}
+
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{q3_eqm_vs_energia.png}
+        \caption{Erro quadrático médio em função de \(r\).}
+        \label{fig:q3_eqm}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{q3_concentracao_energia.png}
+        \caption{Energia acumulada dos coeficientes.}
+        \label{fig:q3_energia}
+    \end{subfigure}
+
+    \caption{Comparação entre DFT e DCT na compressão do sinal \texttt{handel.wav}.}
+    \label{fig:q3_graficos}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.78\textwidth]{q3_trecho_sinal_r75.png}
+    \caption{Comparação entre o sinal original e os sinais reconstruídos por DFT e DCT para \(r=75\%\).}
+    \label{fig:q3_trecho}
+\end{figure}
+
+As Figuras \ref{fig:q3_graficos} e \ref{fig:q3_trecho} reforçam os resultados obtidos numericamente. Observa-se que, para todos os valores de energia preservada, a DCT necessita de menos coeficientes do que a DFT, evidenciando maior capacidade de concentração de energia. Além disso, o gráfico de energia acumulada mostra que a DCT atinge rapidamente altos níveis de energia com uma quantidade menor de coeficientes. O gráfico do erro quadrático médio indica que, à medida que a compressão se torna mais agressiva, o erro aumenta para ambas as transformadas. Por fim, a comparação no domínio do tempo para \(r=75\%\) mostra que os sinais reconstruídos permanecem semelhantes ao original, embora com perda progressiva de fidelidade, sendo a reconstrução via DCT ligeiramente mais eficiente.
+
+\subsection{Discussão dos resultados}
+
+Os resultados mostram que a DCT foi mais eficiente do que a DFT na tarefa de compressão do áudio analisado. Em todos os níveis de preservação de energia, a DCT alcançou desempenho semelhante ou ligeiramente superior em termos de erro, utilizando uma quantidade menor de coeficientes. Isso confirma que a DCT concentra melhor a energia do sinal, tornando-se mais vantajosa quando se deseja reduzir a quantidade de dados necessária para representação do áudio.
+
+Do ponto de vista perceptual, espera-se que, para valores elevados de preservação de energia, como 99,5\% e 99,0\%, os sinais reconstruídos sejam muito semelhantes ao original, com diferenças auditivas mínimas. Para \(r=90{,}0\%\), a qualidade ainda tende a permanecer satisfatória, embora com pequenas perdas. Já para \(r=75{,}0\%\) e, principalmente, \(r=50{,}0\%\), a degradação do sinal reconstruído torna-se mais significativa, uma vez que a quantidade de coeficientes mantidos é muito reduzida e o erro de reconstrução cresce substancialmente.
+
+Assim, nota-se que existe um compromisso entre taxa de compressão e fidelidade do sinal reconstruído. Quanto maior a compressão, menor a quantidade de coeficientes armazenados, porém maior é a perda de qualidade. Nesse contexto, a DCT se destaca por fornecer uma representação mais compacta para um mesmo nível de energia preservada.
+
+\subsection{Conclusão}
+
+Com base nos resultados obtidos para o arquivo \texttt{handel.wav}, conclui-se que tanto a DFT quanto a DCT podem ser utilizadas para compressão de sinais de áudio por meio da retenção dos coeficientes mais energéticos. Entretanto, a DCT apresentou melhor desempenho global, pois preservou a mesma fração de energia utilizando menos coeficientes em todos os casos analisados. Além disso, os valores de EQM obtidos para a DCT foram semelhantes ou ligeiramente menores que os da DFT, especialmente nos casos de compressão mais intensa.
+
+Portanto, para este experimento, a DCT mostrou-se mais adequada para compressão de sinais 1-D, apresentando maior eficiência na compactação da energia e melhor relação entre número de coeficientes mantidos e qualidade do sinal reconstruído.
+
+
+
+%------------------------------------------------
+\section{Questão 4}
+
+A DCT também pode ser utilizada na análise e compressão de sinais bidimensionais, como imagens, devido à sua capacidade de concentrar grande parte da energia em um número reduzido de coeficientes. Nesta questão, foi analisada a distribuição de energia da imagem \texttt{sosias.jpg} no domínio da DCT bidimensional, com o objetivo de verificar como essa energia se distribui entre as componentes de baixa e alta frequência.
+
+\subsection{Metodologia}
+
+Inicialmente, a imagem \texttt{sosias.jpg} foi convertida para escala de cinza, de modo a permitir a aplicação direta da DCT 2-D sobre a matriz de intensidades da imagem. Em seguida, foi calculada a transformada discreta de cossenos bidimensional, obtendo-se uma nova matriz de coeficientes no domínio da frequência espacial.
+
+A energia total da imagem no domínio da DCT foi calculada por
+\[
+E=\sum_u\sum_v |C(u,v)|^2,
+\]
+em que \(C(u,v)\) representa os coeficientes da DCT 2-D. Para analisar a concentração de energia, foi calculada a fração de energia acumulada em blocos \(K \times K\) localizados no canto superior esquerdo da matriz transformada, região associada às componentes de baixa frequência.
+
+\subsection{Resultados obtidos}
+
+A Figura \ref{fig:q4_imagens} apresenta a imagem original em escala de cinza e a representação da magnitude logarítmica da DCT 2-D. Já a Figura \ref{fig:q4_energia} mostra a energia acumulada em função do tamanho do bloco considerado no canto superior esquerdo da transformada.
+
+\begin{figure}[H]
+    \centering
+
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{q4_imagem_cinza.png}
+        \caption{Imagem em escala de cinza.}
+        \label{fig:q4_cinza}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{q4_dct_log_magnitude.png}
+        \caption{Magnitude logarítmica da DCT 2-D.}
+        \label{fig:q4_dct}
+    \end{subfigure}
+
+    \caption{Imagem \texttt{sosias.jpg} e sua representação no domínio da DCT.}
+    \label{fig:q4_imagens}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.78\textwidth]{q4_energia_acumulada_dct.png}
+    \caption{Energia acumulada da DCT em blocos \(K \times K\) no canto superior esquerdo da transformada.}
+    \label{fig:q4_energia}
+\end{figure}
+
+Os valores de energia acumulada obtidos foram:
+
+\begin{itemize}
+    \item \(4 \times 4\): 84,69\%
+    \item \(8 \times 8\): 89,28\%
+    \item \(16 \times 16\): 92,89\%
+    \item \(32 \times 32\): 96,44\%
+    \item \(64 \times 64\): 98,22\%
+    \item \(128 \times 128\): 99,18\%
+    \item \(256 \times 256\): 99,71\%
+\end{itemize}
+
+Observa-se que uma parcela muito elevada da energia total da imagem está concentrada nos coeficientes localizados próximos ao canto superior esquerdo da matriz da DCT. Isso significa que as componentes de baixa frequência são responsáveis pela maior parte da representação energética da imagem.
+
+\subsection{Discussão dos resultados}
+
+A Figura \ref{fig:q4_dct} mostra que os coeficientes de maior magnitude se concentram na região superior esquerda da transformada, enquanto os coeficientes mais afastados dessa região apresentam menor intensidade. Esse comportamento indica que a imagem possui predominância de componentes de baixa frequência, associadas à estrutura global da cena, à iluminação média e às variações suaves de intensidade.
+
+Esse resultado é coerente com as características da imagem analisada, que apresenta grandes regiões relativamente uniformes, como o fundo claro, além de formas bem definidas e variações graduais em boa parte da composição. Os detalhes mais finos, como contornos, listras das camisas, letras e pequenas texturas, contribuem para as componentes de alta frequência, porém representam uma fração menor da energia total.
+
+A Figura \ref{fig:q4_energia} reforça essa interpretação ao mostrar que blocos pequenos da transformada já concentram quase toda a energia da imagem. Um bloco de apenas \(8 \times 8\) coeficientes preserva aproximadamente 89,28\% da energia total, enquanto um bloco \(32 \times 32\) já acumula cerca de 96,44\%. Isso evidencia a elevada capacidade de compactação energética da DCT, que é justamente a propriedade explorada em métodos de compressão de imagens.
+
+\subsection{Conclusão}
+
+Com base nos resultados obtidos, conclui-se que a imagem \texttt{sosias.jpg} apresenta forte concentração de energia nas componentes de baixa frequência da DCT 2-D. A maior parte da energia total é preservada por um conjunto relativamente pequeno de coeficientes localizados no canto superior esquerdo da transformada, enquanto as componentes de alta frequência contribuem com uma parcela menor da energia. Esse comportamento confirma a eficiência da DCT na análise e compressão de imagens, justificando seu amplo uso em técnicas de codificação, como as empregadas em padrões de compressão digital.
+
+%------------------------------------------------
+\section{Questão 5}
+
+Seguindo a mesma lógica de compressão por concentração de energia utilizada em sinais 1-D, também é possível comprimir sinais bidimensionais por meio da DCT 2-D. Entretanto, quando a compressão é aplicada diretamente à imagem inteira, a perda de detalhes locais pode se tornar significativa. Uma alternativa mais eficiente consiste em dividir a imagem em blocos de tamanho \(L \times L\) e aplicar a DCT separadamente em cada bloco, como ocorre no padrão JPEG, que utiliza blocos \(8 \times 8\). Nesta questão, a imagem \texttt{sosias.jpg} foi comprimida em blocos para \(L \in \{8,64\}\) e para fatores de preservação de energia \(r \in \{95\%,50\%\}\), com o objetivo de comparar qualidade visual, quantidade de coeficientes mantidos e erro quadrático médio. :contentReference[oaicite:0]{index=0}
+
+\subsection{Metodologia}
+
+Inicialmente, a imagem foi convertida para escala de cinza e dividida em blocos quadrados de tamanho \(L \times L\). Em cada bloco, foi aplicada a DCT bidimensional, e os coeficientes foram ordenados de acordo com sua energia. Para cada valor de \(r\), foram mantidos apenas os coeficientes necessários para preservar a fração de energia desejada dentro de cada bloco, anulando-se os demais. Em seguida, cada bloco foi reconstruído por meio da transformada inversa, formando a imagem comprimida final.
+
+A energia de cada bloco foi calculada a partir dos coeficientes da DCT, e a qualidade da reconstrução foi avaliada por meio do erro quadrático médio, dado por
+\[
+EQM=\frac{1}{MN}\sum_{m=1}^{M}\sum_{n=1}^{N}\left(I(m,n)-\hat{I}(m,n)\right)^2,
+\]
+em que \(I(m,n)\) representa a imagem original e \(\hat{I}(m,n)\) a imagem reconstruída.
+
+\subsection{Resultados obtidos}
+
+A Tabela \ref{tab:q5_resultados} apresenta os resultados numéricos obtidos para cada combinação de tamanho de bloco e taxa de preservação de energia.
+
+\begin{table}[H]
+    \centering
+    \caption{Resultados da compressão por DCT em blocos da imagem \texttt{sosias.jpg}.}
+    \label{tab:q5_resultados}
+    \begin{tabular}{ccccc}
+        \toprule
+        Bloco \(L\) & Energia \(r\) & Coeficientes mantidos & \% mantido & EQM \\
+        \midrule
+        8  & 95\% & 11004 & 3,07\%  & 181,24 \\
+        8  & 50\% & 5639  & 1,57\%  & 583,57 \\
+        64 & 95\% & 2436  & 0,65\%  & 701,97 \\
+        64 & 50\% & 101   & 0,027\% & 2997,14 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+Observa-se que os blocos maiores permitem uma compressão numérica mais intensa, pois necessitam de menos coeficientes para atingir a mesma taxa de energia preservada. Entretanto, essa redução na quantidade de coeficientes vem acompanhada de um aumento significativo do erro de reconstrução, indicando perda mais acentuada de qualidade visual.
+
+\subsection{Comparação visual das reconstruções}
+
+A Figura \ref{fig:q5_recons} apresenta a imagem original em escala de cinza e as reconstruções obtidas para os quatro casos analisados.
+
+\begin{figure}[H]
+    \centering
+
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{q5_original_cinza.png}
+        \caption{Imagem original em escala de cinza.}
+        \label{fig:q5_original}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{q5_comparacao_reconstrucoes.png}
+        \caption{Reconstruções para os casos analisados.}
+        \label{fig:q5_painel}
+    \end{subfigure}
+
+    \caption{Comparação entre a imagem original e as imagens reconstruídas por DCT em blocos.}
+    \label{fig:q5_recons}
+\end{figure}
+
+Para complementar a análise quantitativa, as Figuras \ref{fig:q5_eqm} e \ref{fig:q5_coef} mostram, respectivamente, a variação do erro quadrático médio e do percentual de coeficientes mantidos em cada caso.
+
+\begin{figure}[H]
+    \centering
+
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{q5_eqm_casos.png}
+        \caption{Erro quadrático médio dos casos analisados.}
+        \label{fig:q5_eqm}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{q5_coeficientes_percentual.png}
+        \caption{Percentual de coeficientes mantidos.}
+        \label{fig:q5_coef}
+    \end{subfigure}
+
+    \caption{Comparação entre erro de reconstrução e quantidade de coeficientes mantidos.}
+    \label{fig:q5_metricas}
+\end{figure}
+
+\subsection{Discussão dos resultados}
+
+Os resultados mostram que o caso \(L=8\), \(r=95\%\) apresentou a melhor fidelidade de reconstrução entre os casos analisados, com menor valor de EQM e melhor preservação visual dos detalhes da imagem. Isso ocorre porque os blocos menores permitem adaptação mais local ao conteúdo da imagem, preservando melhor regiões com diferentes texturas, bordas e contornos.
+
+Quando a taxa de energia foi reduzida para \(r=50\%\), observou-se aumento do erro e perda mais evidente de detalhes, embora os blocos \(8 \times 8\) ainda tenham produzido reconstruções visualmente superiores às obtidas com blocos maiores. Esse comportamento mostra que a redução da energia preservada aumenta a compressão, mas compromete a qualidade visual da imagem reconstruída.
+
+Nos casos com \(L=64\), a quantidade de coeficientes necessários caiu drasticamente, especialmente para \(r=50\%\), em que apenas 101 coeficientes foram mantidos em toda a imagem. Apesar dessa compressão extremamente elevada, o preço pago foi um erro quadrático muito superior e uma degradação visual bastante intensa. Isso mostra que blocos grandes concentram mais energia em menos coeficientes, mas têm menor capacidade de preservar detalhes locais, resultando em perda de qualidade mais pronunciada.
+
+Assim, os resultados confirmam que existe um compromisso entre compressão e fidelidade visual. Blocos grandes favorecem taxas de compressão mais elevadas, enquanto blocos pequenos preservam melhor a qualidade da imagem. Esse equilíbrio justifica o uso de blocos \(8 \times 8\) em padrões de compressão como o JPEG.
+
+\subsection{Conclusão}
+
+Com base nos resultados obtidos, conclui-se que a compressão da imagem \texttt{sosias.jpg} por DCT em blocos depende fortemente tanto do tamanho do bloco quanto da taxa de energia preservada. Blocos \(8 \times 8\) apresentaram melhor qualidade visual e menor erro de reconstrução, embora exijam mais coeficientes. Já blocos \(64 \times 64\) permitiram compressão muito mais agressiva, mas com degradação significativamente maior da imagem.
+
+Portanto, a análise mostra que blocos menores oferecem um compromisso mais adequado entre compressão e fidelidade visual, enquanto blocos maiores favorecem a compactação extrema à custa da qualidade da reconstrução.
+%------------------------------------------------
+
+\end{document}
